@@ -101,3 +101,30 @@ func addCourse(w http.ResponseWriter, r *http.Request) {
 	courses = append(courses, course)
 
 }
+
+func updateCourseById(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Update a course")
+	w.Header().Set("Content-type", "application/json")
+
+	//first - grab id from request
+	params := mux.Vars(r)
+
+	//loop, id, remove, add with my id(from request)
+	for index, course := range courses {
+		//check id
+		if course.CouserId == params["id"] {
+			//remove
+			courses = append(courses[:index], courses[index+1:]...)
+			var course Course
+			_ = json.NewDecoder(r.Body).Decode(&course)
+			course.CouserId = params["id"]
+			courses = append(courses, course)
+			json.NewEncoder(w).Encode(courses)
+			return
+		}
+	}
+
+	//TODO: send a response when id is not find
+	json.NewEncoder(w).Encode("courseid not found")
+
+}
