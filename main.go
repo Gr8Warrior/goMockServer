@@ -158,7 +158,7 @@ func deleteCourseById(w http.ResponseWriter, r *http.Request) {
 			//remove
 			courses = append(courses[:index], courses[index+1:]...)
 			json.NewEncoder(w).Encode("Course Deleted!!!")
-			break
+			return
 		}
 	}
 
