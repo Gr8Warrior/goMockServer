@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -37,6 +38,22 @@ func (c *Course) isEmpty() bool {
 
 func main() {
 	fmt.Println("Mock server in json")
+	r := mux.NewRouter()
+
+	//seeding of data
+	courses = append(courses, Course{"1", "Go Lang", 299, &Author{"Ken", "go.dev"}})
+	courses = append(courses, Course{"2", "Java Basics", 199, &Author{"Shailu", "gr8warrior.com"}})
+
+	//routing
+	r.HandleFunc("/", serverHome).Methods("GET")
+	r.HandleFunc("/courses", getAllCourses).Methods("GET")
+	r.HandleFunc("/course/{id}", getCourseById).Methods("GET")
+	r.HandleFunc("/course", addCourse).Methods("POST")
+	r.HandleFunc("/course/{id}", updateCourseById).Methods("PUT")
+	r.HandleFunc("/course/{id}", deleteCourseById).Methods("DELETE")
+
+	//listen to a port
+	log.Fatal(http.ListenAndServe(":4000", r))
 }
 
 //controllers - file
@@ -55,7 +72,6 @@ func getAllCourses(w http.ResponseWriter, r *http.Request) {
 func getCourseById(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Get course by id")
 	w.Header().Set("Content-type", "application/json")
-	json.NewEncoder(w).Encode(courses[0])
 
 	//grab id from request
 	params := mux.Vars(r)
@@ -67,9 +83,9 @@ func getCourseById(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(course)
 			return
 		}
-		json.NewEncoder(w).Encode("No Course found with given id %d", params["id"])
-		return
 	}
+	json.NewEncoder(w).Encode("No Course found with given id")
+
 }
 
 func addCourse(w http.ResponseWriter, r *http.Request) {
@@ -129,7 +145,7 @@ func updateCourseById(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func deleteCourseByid(w http.ResponseWriter, r *http.Request) {
+func deleteCourseById(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Delete course by id")
 	w.Header().Set("Content-Type", "application/json")
 
